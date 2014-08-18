@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/op/go-logging"
 )
 
 const (
@@ -29,6 +30,8 @@ var (
 	config       *simpleconfig.Config
 	filenotfound string
 )
+
+var log = logging.MustGetLogger("kurz")
 
 type KurzUrl struct {
 	Key          string
@@ -137,6 +140,7 @@ func isValidUrl(rawurl string) (u *url.URL, err error) {
 func shorten(w http.ResponseWriter, r *http.Request) {
 	host := config.GetStringDefault("hostname", "localhost")
 	leUrl := r.FormValue("url")
+	fmt.Println(string(leUrl))
 	theUrl, err := isValidUrl(string(leUrl))
 	if err == nil {
 		ctr, _ := redis.Incr(COUNTER)
@@ -202,7 +206,30 @@ func main() {
 	flag.Parse()
 	path := flag.Arg(0)
 
+	var format = logging.MustStringFormatter("%{level} %{message}")
+  logging.SetFormatter(format)
+
 	config, _ = simpleconfig.NewConfig(path)
+
+	var loglevel logging.Level
+  switch config.GetStringDefault("loglevel", "debug") {
+  case "debug":
+  	loglevel = logging.DEBUG
+	case "critical":
+		loglevel = logging.CRITICAL
+	case "error":
+		loglevel = logging.ERROR
+	case "info":
+		loglevel = logging.INFO
+	case "notice":
+		loglevel = logging.NOTICE
+	case "warning":
+		loglevel = logging.WARNING
+  }
+
+	logging.SetLevel(loglevel, "kurz")
+
+	log.Debug("Starting kurz")
 
 	host := config.GetStringDefault("redis.netaddress", "tcp:localhost:6379")
 	db := config.GetIntDefault("redis.database", 0)
@@ -224,6 +251,7 @@ func main() {
 
 	listen := config.GetStringDefault("listen", "0.0.0.0")
 	port := config.GetStringDefault("port", "9999")
+	log.Debug("Listening %s:%s", listen, port)
 	s := &http.Server{
 		Addr:    listen + ":" + port,
 		Handler: router,
