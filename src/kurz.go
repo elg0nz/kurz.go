@@ -62,6 +62,8 @@ func NewKurzUrl(key, shorturl, longurl string) *KurzUrl {
 // stores a new KurzUrl for the given key, shorturl and longurl. Existing
 // ones with the same url will be overwritten
 func store(key, shorturl, longurl string) *KurzUrl {
+  log.Debug("Storing key: %s, short: %s, long: %s",
+            key, shorturl, longurl)
 	kurl := NewKurzUrl(key, shorturl, longurl)
 	go redis.Hset(kurl.Key, "LongUrl", kurl.LongUrl)
 	go redis.Hset(kurl.Key, "ShortUrl", kurl.ShortUrl)
@@ -73,6 +75,7 @@ func store(key, shorturl, longurl string) *KurzUrl {
 // loads a KurzUrl instance for the given key. If the key is
 // not found, os.Error is returned.
 func load(key string) (*KurzUrl, error) {
+  log.Debug("Loading key: %s", key)
 	if ok, _ := redis.Hexists(key, "ShortUrl"); ok {
 		kurl := new(KurzUrl)
 		kurl.Key = key
@@ -97,6 +100,7 @@ func fileExists(dir string) bool {
 // function to display the info about a KurzUrl given by it's Key
 func info(w http.ResponseWriter, r *http.Request) {
 	short := mux.Vars(r)["short"]
+  log.Debug("Display info for: %s", short)
 	if strings.HasSuffix(short, "+") {
 		short = strings.Replace(short, "+", "", 1)
 	}
@@ -113,8 +117,8 @@ func info(w http.ResponseWriter, r *http.Request) {
 
 // function to resolve a shorturl and redirect
 func resolve(w http.ResponseWriter, r *http.Request) {
-
 	short := mux.Vars(r)["short"]
+  log.Debug("Resolving: %s", short)
 	kurl, err := load(short)
 	if err == nil {
 		go redis.Hincrby(kurl.Key, "Clicks", 1)
@@ -140,12 +144,13 @@ func isValidUrl(rawurl string) (u *url.URL, err error) {
 func shorten(w http.ResponseWriter, r *http.Request) {
 	host := config.GetStringDefault("hostname", "localhost")
 	leUrl := r.FormValue("url")
-	fmt.Println(string(leUrl))
+  log.Debug("Storing url: %s with host %s", string(leUrl), host)
 	theUrl, err := isValidUrl(string(leUrl))
 	if err == nil {
 		ctr, _ := redis.Incr(COUNTER)
 		encoded := Encode(ctr)
-		location := fmt.Sprintf("%s://%s/%s", config.GetStringDefault("proto", HTTP), host, encoded)
+		location := fmt.Sprintf("%s://%s/%s",
+      config.GetStringDefault("proto", HTTP), host, encoded)
 		store(encoded, location, theUrl.String())
 
 		home := r.FormValue("home")
@@ -227,7 +232,7 @@ func main() {
 		loglevel = logging.WARNING
   }
 
-	logging.SetLevel(loglevel, "kurz")
+	logging.SetLevel(loglevel, "debug")
 
 	log.Debug("Starting kurz")
 
