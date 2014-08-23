@@ -63,7 +63,7 @@ func NewKurzUrl(key, shorturl, longurl string) *KurzUrl {
 // ones with the same url will be overwritten
 func store(key, shorturl, longurl string) *KurzUrl {
   log.Debug("Storing key: %s, short: %s, long: %s",
-            key, shorturl, longurl)
+    key, shorturl, longurl)
 	kurl := NewKurzUrl(key, shorturl, longurl)
 	go redis.Hset(kurl.Key, "LongUrl", kurl.LongUrl)
 	go redis.Hset(kurl.Key, "ShortUrl", kurl.ShortUrl)
