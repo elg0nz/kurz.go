@@ -1,4 +1,7 @@
+<<<<<<< HEAD:README.md
 ```
+=======
+>>>>>>> introduce_logging:README
  __
 |  |--.--.--.----.-----.  .-----.-----.
 |    <|  |  |   _|-- __|__|  _  |  _  |
@@ -20,8 +23,8 @@ Compiling kurz.go
 -----------------
 
 Next to having a full install of go itself, kurz.go requires [gorilla.mux](http://www.gorillatoolkit.org/pkg/mux),
-[godis](https://github.com/simonz05/godis) and [simpleconfig](https://github.com/fs111/simpleconfig) to be installed. For installing go itself, please follow the fine
-instructions at http://golang.org
+[godis](https://github.com/simonz05/godis), [simpleconfig](https://github.com/fs111/simpleconfig)
+and [go-logging](https://github.com/op/go-logging) to be installed. For installing go itself, please follow the fine instructions at http://golang.org
 
 For installing gorilla/mux do:
 
@@ -41,8 +44,17 @@ for installing simpleconfig do:
 $ go get github.com/fs111/simpleconfig
 ```
 
+<<<<<<< HEAD:README.md
 Note: These modules will be installed into your ```$GOROOT```, so make sure it is
 writable. Alternatively you can set ```$GOPATH``` and they will be installed there instead.
+=======
+for installing go-logging do:
+
+    $ go get github.com/op/go-logging
+
+Note: These modules will be installed into your $GOROOT, so make sure it is
+writable. Alternatively you can set $GOPATH and they will be installed there instead.
+>>>>>>> introduce_logging:README
 
 Once the dependecies are installed, check out kurz.go:
 ```bash

@@ -200,10 +200,14 @@ func static(w http.ResponseWriter, r *http.Request) {
 	if fname == "" {
 		fname = "index.htm"
 	}
+	log.Debug("Serving static: %s", fname)
+
 	staticDir := config.GetStringDefault("static-directory", "")
 	staticFile := path.Join(staticDir, fname)
 	if fileExists(staticFile) {
 		http.ServeFile(w, r, staticFile)
+	} else {
+		log.Info("Static file %s does not exist.", staticFile)
 	}
 }
 
