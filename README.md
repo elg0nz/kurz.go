@@ -1,8 +1,10 @@
- __                                    
+```
+ __
 |  |--.--.--.----.-----.  .-----.-----.
 |    <|  |  |   _|-- __|__|  _  |  _  |
 |__|__|_____|__| |_____|__|___  |_____|
                           |_____| by @fs111
+```
 
 kurz.go - a url shortener in go
 --------------------------------
@@ -17,31 +19,39 @@ urls are stored in a redis (http://redis.io) instance.
 Compiling kurz.go
 -----------------
 
-Next to having a full install of go itself, kurz.go requires gorilla.mux,
-godis and simpleconfig to be installed. For installing go itself, please follow the fine
+Next to having a full install of go itself, kurz.go requires [gorilla.mux](http://www.gorillatoolkit.org/pkg/mux),
+[godis](https://github.com/simonz05/godis) and [simpleconfig](https://github.com/fs111/simpleconfig) to be installed. For installing go itself, please follow the fine
 instructions at http://golang.org
 
 For installing gorilla/mux do:
 
-    $ go get code.google.com/p/gorilla/mux
+```bash
+$ go get code.google.com/p/gorilla/mux
+```
 
 for installing godis do:
 
-    $ go get github.com/simonz05/godis/redis
+```bash
+$ go get github.com/simonz05/godis/redis
+```
 
 for installing simpleconfig do:
 
-    $ go get github.com/fs111/simpleconfig
+```bash
+$ go get github.com/fs111/simpleconfig
+```
 
-Note: These modules will be installed into your $GOROOT, so make sure it is
-writable. Alternatively you can set $GOPATH and they will be installed there instead.
+Note: These modules will be installed into your ```$GOROOT```, so make sure it is
+writable. Alternatively you can set ```$GOPATH``` and they will be installed there instead.
 
 Once the dependecies are installed, check out kurz.go:
-    $ git clone https://github.com/fs111/kurz.go
-    $ cd kurz.go
-    $ make
-    $ cd target
-    $ usr/bin/kurz etc/kurz/kurz.conf #assumes that redis is up and running
+```bash
+$ git clone https://github.com/fs111/kurz.go
+$ cd kurz.go
+$ make
+$ cd target
+$ usr/bin/kurz etc/kurz/kurz.conf #assumes that redis is up and running
+```
 
 In order to shorten a url POST it to http://localhost:9999/shorten/ with the
 parameter url set to the long url. In return, you will get a json document
@@ -49,25 +59,27 @@ containing the long and the short url. If you open the shortened URL, "kurz"
 will do the expected thing an redirect you to the original URL. All
 functionality is shown below:
 
+```bash
 # store a URL
 $ curl -L http://localhost:9999/shorten/ --data-urlencode "url=https://github.com/fs111/kurz.go"
 
-{"Key":"eIi","ShortUrl":"http://localhost:9999/eIi","LongUrl":"http://github.com/fs111/kurz.go","CreationDate":1321486517214982000,"Clicks":0}
+# {"Key":"eIi","ShortUrl":"http://localhost:9999/eIi","LongUrl":"http://github.com/fs111/kurz.go","CreationDate":1321486517214982000,"Clicks":0}
 
 # open a URL
 $ curl -L http://localhost:9999/eIi
 
-Redirecting to: http://github.com/fs111/kurz.go
+# Redirecting to: http://github.com/fs111/kurz.go
 
 # show information about a url
 $ curl http://localhost:9999/eIi+ # notice the bit.ly style + in the end
 
 {"Key":"eIi","ShortUrl":"http://localhost:9999/eIi","LongUrl":"http://github.com/fs111/kurz.go","CreationDate":1321486517214982000,"Clicks":1}
 
-
 # list latest URLs
+
 $ curl  http://localhost:9999/latest/1
-{ "urls" : [{"Key":"eIi","ShortUrl":"http://localhost:9999/eIi","LongUrl":"http://github.com/fs111/kurz.go","CreationDate":1321486517214982000,"Clicks":0}] }
+# { "urls" : [{"Key":"eIi","ShortUrl":"http://localhost:9999/eIi","LongUrl":"http://github.com/fs111/kurz.go","CreationDate":1321486517214982000,"Clicks":0}] }
+```
 
 All urls are stored in redis and if you set it up so, that it persists data to
 disk, the state can be kept forever. Since there is no real state within
