@@ -247,10 +247,6 @@ func main() {
 
 	log.Info("Starting kurz")
 
-	host := config.GetStringDefault("redis.netaddress", "tcp:localhost:6379")
-	db := config.GetIntDefault("redis.database", 0)
-	passwd := config.GetStringDefault("redis.password", "")
-
 	filenotfound = config.GetStringDefault("filenotfound", "https://www.youtube.com/watch?v=oHg5SJYRHA0")
 
 	allowedHostNames = strings.Split(config.GetStringDefault("allowed_host_names", ""), ",")
@@ -260,7 +256,7 @@ func main() {
 
 	log.Debug("Will short URLs from following sites: %q", allowedHostNames)
 
-	redis = godis.New(host, db, passwd)
+	redis = redis_instance(config)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/shorten/{url:(.*$)}", shorten)
