@@ -29,6 +29,7 @@ var (
 	redis        *godis.Client
 	config       *simpleconfig.Config
 	filenotfound string
+	allowedHostNames []string
 )
 
 var log = logging.MustGetLogger("kurz")
@@ -147,6 +148,13 @@ func shorten(w http.ResponseWriter, r *http.Request) {
   log.Debug("Storing url: %s with host %s", string(leUrl), host)
 	theUrl, err := isValidUrl(string(leUrl))
 	if err == nil {
+		if !check_hostname(allowedHostNames, theUrl) {
+			log.Debug("Host name not allowed.")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Hostname not allowed"))
+			return
+		}
+
 		ctr, _ := redis.Incr(COUNTER)
 		encoded := Encode(ctr)
 		location := fmt.Sprintf("%s://%s/%s",
@@ -245,6 +253,13 @@ func main() {
 	passwd := config.GetStringDefault("redis.password", "")
 
 	filenotfound = config.GetStringDefault("filenotfound", "https://www.youtube.com/watch?v=oHg5SJYRHA0")
+
+	allowedHostNames = strings.Split(config.GetStringDefault("allowed_host_names", ""), ",")
+	if len(allowedHostNames) == 1 && allowedHostNames[0] == "" {
+		allowedHostNames = []string{}
+	}
+
+	log.Debug("Will short URLs from following sites: %q", allowedHostNames)
 
 	redis = godis.New(host, db, passwd)
 
