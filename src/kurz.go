@@ -256,7 +256,7 @@ func main() {
 
 	log.Debug("Will short URLs from following sites: %q", allowedHostNames)
 
-	redis = redis_instance(config)
+	redis = redis_instance()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/shorten/{url:(.*$)}", shorten)
