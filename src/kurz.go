@@ -63,8 +63,7 @@ func NewKurzUrl(key, shorturl, longurl string) *KurzUrl {
 // stores a new KurzUrl for the given key, shorturl and longurl. Existing
 // ones with the same url will be overwritten
 func store(key, shorturl, longurl string) *KurzUrl {
-  log.Debug("Storing key: %s, short: %s, long: %s",
-    key, shorturl, longurl)
+  log.Info("Storing key: %s, short: %s, long: %s", key, shorturl, longurl)
 	kurl := NewKurzUrl(key, shorturl, longurl)
 	go redis.Hset(kurl.Key, "LongUrl", kurl.LongUrl)
 	go redis.Hset(kurl.Key, "ShortUrl", kurl.ShortUrl)
@@ -76,7 +75,7 @@ func store(key, shorturl, longurl string) *KurzUrl {
 // loads a KurzUrl instance for the given key. If the key is
 // not found, os.Error is returned.
 func load(key string) (*KurzUrl, error) {
-  log.Debug("Loading key: %s", key)
+  log.Info("Loading key: %s", key)
 	if ok, _ := redis.Hexists(key, "ShortUrl"); ok {
 		kurl := new(KurzUrl)
 		kurl.Key = key
@@ -101,7 +100,7 @@ func fileExists(dir string) bool {
 // function to display the info about a KurzUrl given by it's Key
 func info(w http.ResponseWriter, r *http.Request) {
 	short := mux.Vars(r)["short"]
-  log.Debug("Display info for: %s", short)
+  log.Info("Display info for: %s", short)
 	if strings.HasSuffix(short, "+") {
 		short = strings.Replace(short, "+", "", 1)
 	}
@@ -119,7 +118,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 // function to resolve a shorturl and redirect
 func resolve(w http.ResponseWriter, r *http.Request) {
 	short := mux.Vars(r)["short"]
-  log.Debug("Resolving: %s", short)
+  log.Info("Resolving: %s", short)
 	kurl, err := load(short)
 	if err == nil {
 		go redis.Hincrby(kurl.Key, "Clicks", 1)
@@ -145,7 +144,7 @@ func isValidUrl(rawurl string) (u *url.URL, err error) {
 func shorten(w http.ResponseWriter, r *http.Request) {
 	host := config.GetStringDefault("hostname", "localhost")
 	leUrl := r.FormValue("url")
-  log.Debug("Storing url: %s with host %s", string(leUrl), host)
+  log.Info("Storing url: %s with host %s", string(leUrl), host)
 	theUrl, err := isValidUrl(string(leUrl))
 	if err == nil {
 		if !check_hostname(allowedHostNames, theUrl) {
@@ -208,7 +207,7 @@ func static(w http.ResponseWriter, r *http.Request) {
 	if fname == "" {
 		fname = "index.htm"
 	}
-	log.Debug("Serving static: %s", fname)
+	log.Info("Serving static: %s", fname)
 
 	staticDir := config.GetStringDefault("static-directory", "")
 	staticFile := path.Join(staticDir, fname)
@@ -229,7 +228,7 @@ func main() {
 	config, _ = simpleconfig.NewConfig(path)
 
 	var loglevel logging.Level
-  switch config.GetStringDefault("loglevel", "debug") {
+  switch config.GetStringDefault("loglevel", "info") {
   case "debug":
   	loglevel = logging.DEBUG
 	case "critical":
@@ -244,9 +243,9 @@ func main() {
 		loglevel = logging.WARNING
   }
 
-	logging.SetLevel(loglevel, "debug")
+	logging.SetLevel(loglevel, "info")
 
-	log.Debug("Starting kurz")
+	log.Info("Starting kurz")
 
 	host := config.GetStringDefault("redis.netaddress", "tcp:localhost:6379")
 	db := config.GetIntDefault("redis.database", 0)
@@ -275,7 +274,7 @@ func main() {
 
 	listen := config.GetStringDefault("listen", "0.0.0.0")
 	port := config.GetStringDefault("port", "9999")
-	log.Debug("Listening %s:%s", listen, port)
+	log.Info("Listening %s:%s", listen, port)
 	s := &http.Server{
 		Addr:    listen + ":" + port,
 		Handler: router,

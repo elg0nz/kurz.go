@@ -3,7 +3,7 @@ package main
 import "net/url"
 
 func check_hostname(allowedHostNames []string, input *url.URL) bool {
-  log.Debug("Call to check if hostname in %q", allowedHostNames)
+  log.Debug("Call to check if %s in %q", input.Host, allowedHostNames)
 
   if input == nil {
     return false

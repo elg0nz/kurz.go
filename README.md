@@ -41,17 +41,14 @@ for installing simpleconfig do:
 $ go get github.com/fs111/simpleconfig
 ```
 
-<<<<<<< HEAD:README.md
-Note: These modules will be installed into your ```$GOROOT```, so make sure it is
-writable. Alternatively you can set ```$GOPATH``` and they will be installed there instead.
-=======
 for installing go-logging do:
 
-    $ go get github.com/op/go-logging
+```bash
+$ go get github.com/op/go-logging
+```
 
-Note: These modules will be installed into your $GOROOT, so make sure it is
-writable. Alternatively you can set $GOPATH and they will be installed there instead.
->>>>>>> introduce_logging:README
+Note: These modules will be installed into your ```$GOROOT```, so make sure it is
+writable. Alternatively you can set ```$GOPATH``` and they will be installed there instead.
 
 Once the dependecies are installed, check out kurz.go:
 ```bash
