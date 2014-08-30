@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fs111/simpleconfig"
+	"github.com/op/go-logging"
 	godis "github.com/simonz05/godis/redis"
 	"io"
 	"net/http"
@@ -16,7 +17,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/op/go-logging"
 )
 
 const (
@@ -26,9 +26,9 @@ const (
 )
 
 var (
-	redis        *godis.Client
-	config       *simpleconfig.Config
-	filenotfound string
+	redis            *godis.Client
+	config           *simpleconfig.Config
+	filenotfound     string
 	allowedHostNames []string
 )
 
@@ -63,7 +63,7 @@ func NewKurzUrl(key, shorturl, longurl string) *KurzUrl {
 // stores a new KurzUrl for the given key, shorturl and longurl. Existing
 // ones with the same url will be overwritten
 func store(key, shorturl, longurl string) *KurzUrl {
-  log.Info("Storing key: %s, short: %s, long: %s", key, shorturl, longurl)
+	log.Info("Storing key: %s, short: %s, long: %s", key, shorturl, longurl)
 	kurl := NewKurzUrl(key, shorturl, longurl)
 	go redis.Hset(kurl.Key, "LongUrl", kurl.LongUrl)
 	go redis.Hset(kurl.Key, "ShortUrl", kurl.ShortUrl)
@@ -75,7 +75,7 @@ func store(key, shorturl, longurl string) *KurzUrl {
 // loads a KurzUrl instance for the given key. If the key is
 // not found, os.Error is returned.
 func load(key string) (*KurzUrl, error) {
-  log.Info("Loading key: %s", key)
+	log.Info("Loading key: %s", key)
 	if ok, _ := redis.Hexists(key, "ShortUrl"); ok {
 		kurl := new(KurzUrl)
 		kurl.Key = key
@@ -100,7 +100,7 @@ func fileExists(dir string) bool {
 // function to display the info about a KurzUrl given by it's Key
 func info(w http.ResponseWriter, r *http.Request) {
 	short := mux.Vars(r)["short"]
-  log.Info("Display info for: %s", short)
+	log.Info("Display info for: %s", short)
 	if strings.HasSuffix(short, "+") {
 		short = strings.Replace(short, "+", "", 1)
 	}
@@ -118,7 +118,7 @@ func info(w http.ResponseWriter, r *http.Request) {
 // function to resolve a shorturl and redirect
 func resolve(w http.ResponseWriter, r *http.Request) {
 	short := mux.Vars(r)["short"]
-  log.Info("Resolving: %s", short)
+	log.Info("Resolving: %s", short)
 	kurl, err := load(short)
 	if err == nil {
 		go redis.Hincrby(kurl.Key, "Clicks", 1)
@@ -144,7 +144,7 @@ func isValidUrl(rawurl string) (u *url.URL, err error) {
 func shorten(w http.ResponseWriter, r *http.Request) {
 	host := config.GetStringDefault("hostname", "localhost")
 	leUrl := r.FormValue("url")
-  log.Info("Storing url: %s with host %s", string(leUrl), host)
+	log.Info("Storing url: %s with host %s", string(leUrl), host)
 	theUrl, err := isValidUrl(string(leUrl))
 	if err == nil {
 		if !check_hostname(allowedHostNames, theUrl) {
@@ -157,7 +157,7 @@ func shorten(w http.ResponseWriter, r *http.Request) {
 		ctr, _ := redis.Incr(COUNTER)
 		encoded := Encode(ctr)
 		location := fmt.Sprintf("%s://%s/%s",
-      config.GetStringDefault("proto", HTTP), host, encoded)
+			config.GetStringDefault("proto", HTTP), host, encoded)
 		store(encoded, location, theUrl.String())
 
 		home := r.FormValue("home")
@@ -223,14 +223,14 @@ func main() {
 	path := flag.Arg(0)
 
 	var format = logging.MustStringFormatter("%{level} %{message}")
-  logging.SetFormatter(format)
+	logging.SetFormatter(format)
 
 	config, _ = simpleconfig.NewConfig(path)
 
 	var loglevel logging.Level
-  switch config.GetStringDefault("loglevel", "info") {
-  case "debug":
-  	loglevel = logging.DEBUG
+	switch config.GetStringDefault("loglevel", "info") {
+	case "debug":
+		loglevel = logging.DEBUG
 	case "critical":
 		loglevel = logging.CRITICAL
 	case "error":
@@ -241,7 +241,7 @@ func main() {
 		loglevel = logging.NOTICE
 	case "warning":
 		loglevel = logging.WARNING
-  }
+	}
 
 	logging.SetLevel(loglevel, "info")
 
