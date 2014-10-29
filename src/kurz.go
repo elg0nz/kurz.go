@@ -241,11 +241,15 @@ func main() {
 		loglevel = logging.NOTICE
 	case "warning":
 		loglevel = logging.WARNING
-	}
+  }
 
 	logging.SetLevel(loglevel, "info")
 
-	log.Info("Starting kurz")
+	log.Debug("Starting kurz")
+
+	host := config.GetStringDefault("redis.netaddress", "tcp:localhost:6379")
+	db := config.GetIntDefault("redis.database", 0)
+	passwd := config.GetStringDefault("redis.password", "")
 
 	filenotfound = config.GetStringDefault("filenotfound", "https://www.youtube.com/watch?v=oHg5SJYRHA0")
 
