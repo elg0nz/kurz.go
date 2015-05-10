@@ -23,6 +23,24 @@ Next to having a full install of go itself, kurz.go requires [gorilla.mux](http:
 [godis](https://github.com/simonz05/godis), [simpleconfig](https://github.com/fs111/simpleconfig)
 and [go-logging](https://github.com/op/go-logging) to be installed. For installing go itself, please follow the fine instructions at http://golang.org
 
+For installing godis do:
+
+```bash
+$ go get github.com/simonz05/godis
+```
+
+For installing simpleconfig do:
+
+```bash
+$ go get github.com/fs111/simpleconfig
+```
+
+For installing go-logging do:
+
+```bash
+$ go get github.com/op/go-logging
+```
+
 For installing gorilla/mux do:
 
 ```bash
@@ -47,6 +65,17 @@ for installing go-logging do:
 $ go get github.com/op/go-logging
 ```
 
+for installing godotenv do:
+
+```bash
+$ go get github.com/op/godotenv
+```
+
+Or if you're in a hurry
+```bash
+cat README.md | grep -o 'go get.*' | xargs -n 3
+```
+
 Note: These modules will be installed into your ```$GOROOT```, so make sure it is
 writable. Alternatively you can set ```$GOPATH``` and they will be installed there instead.
 
@@ -56,7 +85,8 @@ $ git clone https://github.com/fs111/kurz.go
 $ cd kurz.go
 $ make
 $ cd target
-$ usr/bin/kurz etc/kurz/kurz.conf #assumes that redis is up and running
+$ cp .env.sample .env # More details on .env in https://github.com/joho/godotenv
+$ usr/bin/kurz # Redis should be up and running
 ```
 
 In order to shorten a url POST it to http://localhost:9999/shorten/ with the

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"code.google.com/p/gorilla/mux"
 	"encoding/json"
 	"errors"
@@ -142,7 +143,7 @@ func isValidUrl(rawurl string) (u *url.URL, err error) {
 
 // function to shorten and store a url
 func shorten(w http.ResponseWriter, r *http.Request) {
-	host := config.GetStringDefault("hostname", "localhost")
+	host := os.Getenv("HOSTNAME")
 	leUrl := r.FormValue("url")
 	log.Info("Storing url: %s with host %s", string(leUrl), host)
 	theUrl, err := isValidUrl(string(leUrl))
@@ -157,7 +158,7 @@ func shorten(w http.ResponseWriter, r *http.Request) {
 		ctr, _ := redis.Incr(COUNTER)
 		encoded := Encode(ctr)
 		location := fmt.Sprintf("%s://%s/%s",
-			config.GetStringDefault("proto", HTTP), host, encoded)
+			os.Getenv("PROTO"), host, encoded)
 		store(encoded, location, theUrl.String())
 
 		home := r.FormValue("home")
@@ -209,7 +210,7 @@ func static(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Info("Serving static: %s", fname)
 
-	staticDir := config.GetStringDefault("static-directory", "")
+	staticDir := os.Getenv("STATIC_DIR")
 	staticFile := path.Join(staticDir, fname)
 	if fileExists(staticFile) {
 		http.ServeFile(w, r, staticFile)
@@ -219,6 +220,11 @@ func static(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
+
 	flag.Parse()
 	path := flag.Arg(0)
 
@@ -228,7 +234,7 @@ func main() {
 	config, _ = simpleconfig.NewConfig(path)
 
 	var loglevel logging.Level
-	switch config.GetStringDefault("loglevel", "info") {
+	switch os.Getenv("LOGLEVEL") {
 	case "debug":
 		loglevel = logging.DEBUG
 	case "critical":
@@ -247,16 +253,10 @@ func main() {
 
 	log.Debug("Starting kurz")
 
-	host := config.GetStringDefault("redis.netaddress", "tcp:localhost:6379")
-	db := config.GetIntDefault("redis.database", 0)
-	passwd := config.GetStringDefault("redis.password", "")
+	filenotfound = os.Getenv("FILE_NOT_FOUND_URL")
 
-	filenotfound = config.GetStringDefault("filenotfound", "https://www.youtube.com/watch?v=oHg5SJYRHA0")
-
-	allowedHostNames = strings.Split(config.GetStringDefault("allowed_host_names", ""), ",")
-	if len(allowedHostNames) == 1 && allowedHostNames[0] == "" {
-		allowedHostNames = []string{}
-	}
+  // TODO: Restore this feature
+  allowedHostNames = []string{}
 
 	log.Debug("Will short URLs from following sites: %q", allowedHostNames)
 
@@ -272,8 +272,8 @@ func main() {
 
 	router.HandleFunc("/{fileName:(.*$)}", static)
 
-	listen := config.GetStringDefault("listen", "0.0.0.0")
-	port := config.GetStringDefault("port", "9999")
+	listen := os.Getenv("LISTEN_ADDRESS")
+	port := os.Getenv("LISTEN_PORT")
 	log.Info("Listening %s:%s", listen, port)
 	s := &http.Server{
 		Addr:    listen + ":" + port,

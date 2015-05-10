@@ -1,1 +1,5 @@
-* write howto for nginx
+[X] Use dotenv for setting configuration
+[_] Fully remove simpleconf
+[_] Restore hostname whitelisting feature
+[_] Tests for kurz.go
+[_] Write howto for nginx
